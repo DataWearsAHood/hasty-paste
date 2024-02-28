@@ -51,6 +51,12 @@ resource "aws_instance" "web" {
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.web-sg.id]
 
+  metadata_options {
+    http_endpoint               = "disabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
   user_data = <<-EOF
               #!/bin/sh
               sh /app/entrypoint.sh
