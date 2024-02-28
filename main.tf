@@ -64,6 +64,11 @@ resource "aws_instance" "web" {
               EOF
 }
 
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDS4u0vd4q6qMCcokVfMGkZ+aM3jt9cnna92KBZ2kfpVgrvLJS1Mq1VTJPZmPzlmNTBXsllTwBI16ePAjKbljfV3AaOwzCBLGMQY6Qwas/Y7zZCYGjm9vgy0MlKpZFgYAEMjgh62Gc7PsFHCrYbk5a1UqLdjg2UltoYH64ladpWf9kgzK8BBGKy5/9DWo7x7Uk9HZqr3s4pWiA0oVgy2HqxeKEaoBS11H8fxgR1tnWAcQk/Iaf+DUJYJ3jUaiZybZozOxSfy3KNm57pLFKB1Z6Yu7JIYrEytLgWvsw+CgLxQaXzGybnwvMP2zsfBWih+M36OG04MeBROZFZvhEvH+G8EQVihkyGM8I6T6fqDeFSrJrvXa3pkIZ0KZDOtHPXvuaUeBE6TyFsqMf0vNB70dX56I61MrUsYo/wrqMbXKfHImKUVPSmkKioNTGi8hljKddcR8PDNIfZ0xMwZ7EhceRCXG5ALBdF2cFkQnMJ1sAk1keSZQzwMVoke/roWWSxxMk="
+}
+
 resource "aws_security_group" "web-sg" {
   name = "${random_pet.sg.id}-sg"
   ingress {
