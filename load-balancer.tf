@@ -1,8 +1,8 @@
 # Create Security Group - load balancer
-resource "aws_security_group" "lb-dogs-or-cats-app" {
+resource "aws_security_group" "lb-security-group" {
   vpc_id      = aws_vpc.vpc.id
-  name        = "SecurityGroup-LB-DogsOrCatsApp"
-  description = "Security Group for the dogs-or-cats.com app Load Balancer."
+  name        = "SecurityGroup-LB-${local.app-name}"
+  description = "Security Group for the ${local.app-name} app Load Balancer."
 
   ingress {
     protocol    = "tcp"
@@ -19,21 +19,20 @@ resource "aws_security_group" "lb-dogs-or-cats-app" {
   }
 
   tags = {
-    Name        = "SecurityGroup-LB-DogsOrCatsApp"
-    Application = "dogs-or-cats.com"
-  } 
+    App = "${local.app-name}"
+  }
 }
 
 # Create a new load balancer
-resource "aws_elb" "dogs-or-cats-elb" {
-  name               = "dogs-or-cats-elb"
-  subnets            = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-2.id, aws_subnet.public-subnet-3.id]
-  security_groups    = [aws_security_group.lb-dogs-or-cats-app.id]
+resource "aws_elb" "elb-load-balancer" {
+  name               = "${local.app-name}-elb"
+  subnets            = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-2.id]
+  security_groups    = [aws_security_group.lb-security-group.id]
 
   listener {
-    instance_port     = 80
+    instance_port     = "${local.app-internal-port}"
     instance_protocol = "http"
-    lb_port           = 80
+    lb_port           = "${local.app-internal-port}"
     lb_protocol       = "http"
   }
 
@@ -41,7 +40,7 @@ resource "aws_elb" "dogs-or-cats-elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
-    target              = "HTTP:80/"
+    target              = "HTTP:${local.app-internal-port}/"
     interval            = 5
   }
 
@@ -52,14 +51,13 @@ resource "aws_elb" "dogs-or-cats-elb" {
   connection_draining         = false
 
   tags = {
-    Name = "dogs-or-cats-elb"
-    Application = "dogs-or-cats.com"
+    App = "${local.app-name}"
   }
 }
 
 # Output
 output "loadbalancer_dns_name" {
-  value = aws_elb.dogs-or-cats-elb.dns_name
+  value = aws_elb.elb-load-balancer.dns_name
 }
 
 # End;

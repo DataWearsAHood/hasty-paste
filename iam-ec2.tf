@@ -1,6 +1,6 @@
 # Create IAM Assume Role
 resource "aws_iam_role" "iam_assume_role" {
-  name = "dogs-or-cats-iam-role"
+  name = "${local.app-name}-iam-role"
 
   assume_role_policy = <<EOF
 {
@@ -19,7 +19,7 @@ resource "aws_iam_role" "iam_assume_role" {
 EOF
 
   tags = {
-      Application = "dogs-or-cats.com"
+      Application = "${local.app-name}.com"
   }
 }
 
