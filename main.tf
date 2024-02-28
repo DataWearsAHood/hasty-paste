@@ -50,6 +50,7 @@ resource "aws_instance" "web" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.web-sg.id]
+  # associate_public_ip_address = true  # already done?
 
   metadata_options {
     http_endpoint               = "disabled"
@@ -66,10 +67,24 @@ resource "aws_instance" "web" {
 resource "aws_security_group" "web-sg" {
   name = "${random_pet.sg.id}-sg"
   ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["192.222.189.20/32"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp" # TODO: switch to `http` (?)
+    cidr_blocks = ["192.222.189.20/32"]
+  }
+  
+  ingress {
     from_port   = 8000
     to_port     = 8000
     protocol    = "tcp" # TODO: switch to `http` (?)
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["192.222.189.20/32"]
   }
   // connectivity to ubuntu mirrors is required to run `apt-get update` and `apt-get install apache2`
   egress {
