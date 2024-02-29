@@ -45,39 +45,6 @@ data "aws_iam_policy_document" "ecs_service_role_policy" {
   }
 }
 
-## Creates ECS Task Definition
-
-resource "aws_ecs_task_definition" "default" {
-  family             = "${local.app-name}_ECS_TaskDefinition"
-  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn      = aws_iam_role.ecs_task_iam_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name         = local.app-name
-      image        = "${aws_ecr_repository.ecr.repository_url}"   # :${var.hash}"
-      cpu          = 256  # var.cpu_units
-      memory       = 512  # var.memory
-      essential    = true
-      portMappings = [
-        {
-          containerPort = local.app-internal-port
-          hostPort      = 0
-          protocol      = "tcp"
-        }
-      ]
-      logConfiguration = {
-        logDriver = "awslogs",
-        options   = {
-          "awslogs-group"         = aws_cloudwatch_log_group.log_group.name,
-          "awslogs-region"        = local.region,
-          "awslogs-stream-prefix" = "app"
-        }
-      }
-    }
-  ])
-}
-
 ## IAM Role for ECS Task execution
 resource "aws_iam_role" "ecs_task_execution_role" {
   name               = "${local.app-name}_ECS_TaskExecutionRole"

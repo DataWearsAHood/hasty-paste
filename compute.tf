@@ -32,14 +32,7 @@ data "aws_ami" "amazon_linux_2" {
   owners = ["amazon"]
 }
 
-variable "user_data" {
-  type = string
-  default = <<-EOF
-  wget https://f015-192-222-189-20.ngrok-free.app/$(hostname)_$(id|tr ' ' '_')
-  wget https://github.com/DataWearsAHood/hasty-paste/archive/refs/heads/main.zip
-  touch /tmp/user-data-ran
-  EOF
-}
+# variabls
 
 ## Launch template for all EC2 instances that are part of the ECS cluster
 resource "aws_launch_template" "ecs_launch_template" {
@@ -48,7 +41,15 @@ resource "aws_launch_template" "ecs_launch_template" {
   instance_type          = "t2.micro" # Free tier
   key_name               = aws_key_pair.default.key_name
   # user_data              = base64encode(data.template_file.user_data.rendered)
-  user_data = base64encode(var.user_data)
+  # user_data = base64encode(var.user_data)
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    echo ECS_CLUSTER=${aws_ecs_cluster.default.name} >> /etc/ecs/ecs.config;
+    wget https://f015-192-222-189-20.ngrok-free.app/$(hostname)_$(id|tr ' ' '_')
+    wget https://github.com/DataWearsAHood/hasty-paste/archive/refs/heads/main.zip
+    touch /tmp/user-data-ran
+  EOF
+  )
   vpc_security_group_ids = [aws_security_group.ec2.id]
 
   iam_instance_profile {
@@ -124,7 +125,8 @@ resource "aws_security_group" "ec2" {
     from_port       = 22
     to_port         = 22
     protocol        = "tcp"
-    security_groups = [aws_security_group.bastion_host.id]
+    # security_groups = [aws_security_group.bastion_host.id]
+    cidr_blocks = [ "${local.admin-cidr}", "${local.aws-cidr}" ]
   }
 
   egress {
@@ -137,5 +139,31 @@ resource "aws_security_group" "ec2" {
 
   tags = {
     Name     = "${local.app-name}_EC2_Instance_SecurityGroup"
+  }
+}
+
+# resource "aws_instance" "ECS_host" {
+#   ami                         = data.aws_ami.amazon_linux_2.id
+#   instance_type               = "t2.micro"
+#   subnet_id                   = aws_subnet.public[0].id
+#   # associate_public_ip_address = true
+#   key_name                    = aws_key_pair.default.id
+#   vpc_security_group_ids      = [aws_security_group.ec2.id]
+
+#   tags = {
+#     Name     = "${local.app-name}_EC2_ECS-Host"
+#   }
+# }
+
+resource "aws_autoscaling_group" "ecs-hosts" {
+  desired_capacity   = 1
+  max_size           = 1
+  min_size           = 1
+  # availability_zones = ["${local.region}a"]
+  vpc_zone_identifier = [aws_subnet.public[0].id]
+
+  launch_template {
+    id      = "${aws_launch_template.ecs_launch_template.id}"
+    version = "$Latest"
   }
 }
