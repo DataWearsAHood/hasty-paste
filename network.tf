@@ -1,147 +1,117 @@
 # Create a VPC
-resource "aws_vpc" "vpc" {
-  cidr_block           = "10.2.0.0/16"
+resource "aws_vpc" "default_vpc" {
+  cidr_block           = local.vpc-cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    App = "${local.app-name}"
+    Name     = "${local.app-name}_VPC"
   }
 }
 
-# Create an Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id        = aws_vpc.vpc.id
+## Create Internet Gateway for egress/ingress connections to resources in the public subnets
+resource "aws_internet_gateway" "default" {
+  vpc_id = aws_vpc.default_vpc.id
 
   tags = {
-    App = "${local.app-name}"
+    Name     = "${local.app-name}_InternetGateway"
   }
 }
 
-# Create (one) NAT Gateway
-resource "aws_eip" "eip-nat-gateway" {
-  # count = 1
-  domain = "vpc"
-}
-resource "aws_nat_gateway" "nat-gateway-1" {
-  allocation_id = aws_eip.eip-nat-gateway.id
-  subnet_id     = aws_subnet.public-subnet-1.id
+## This resource returns a list of all AZ available in the region configured in the AWS credentials
+data "aws_availability_zones" "available" {}
 
-  tags = {
-    App = "${local.app-name}"
-  }
-}
-
-# Create subnets
-resource "aws_subnet" "public-subnet-1" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.2.0.0/24"
+## One public subnet per AZ
+resource "aws_subnet" "public" {
+  count                   = local.az_count
+  cidr_block              = cidrsubnet(local.vpc-cidr, 8, local.az_count + count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  vpc_id                  = aws_vpc.default_vpc.id
   map_public_ip_on_launch = true
-  availability_zone = "${local.region}a"
 
   tags = {
-    App = "${local.app-name}"
+    Name     = "${local.app-name}_PublicSubnet_${count.index}"
   }
 }
-resource "aws_subnet" "public-subnet-2" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.2.1.0/24"
-  map_public_ip_on_launch = true
-  availability_zone = "${local.region}b"
 
-  tags = {
-    App = "${local.app-name}"
-  }
-}
-# resource "aws_subnet" "public-subnet-3" {
-#   vpc_id     = aws_vpc.vpc.id
-#   cidr_block = "10.2.2.0/24"
-#   map_public_ip_on_launch = true
-#   availability_zone = "${local.region}d"
-
-#   tags = {
-#     App = "${local.app-name}"
-#   }
-# }
-resource "aws_subnet" "private-subnet-1" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.2.10.0/24"
-  map_public_ip_on_launch = false
-  availability_zone = "${local.region}a"
-
-  tags = {
-    App = "${local.app-name}"
-  }
-}
-resource "aws_subnet" "private-subnet-2" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.2.11.0/24"
-  map_public_ip_on_launch = false
-  availability_zone = "${local.region}b"
-
-  tags = {
-    App = "${local.app-name}"
-  }
-}
-# resource "aws_subnet" "private-subnet-3" {
-#   vpc_id     = aws_vpc.vpc.id
-#   cidr_block = "10.2.12.0/24"
-#   map_public_ip_on_launch = false
-#   availability_zone = "${local.region}d"
-
-#   tags = {
-#     App = "${local.app-name}"
-#   }
-# }
-
-# Create the Route Tables
+## Route Table with egress route to the internet
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = aws_vpc.default_vpc.id
+
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = aws_internet_gateway.default.id
   }
 
   tags = {
-    App = "${local.app-name}"
-  }
-}
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat-gateway-1.id
-  }
-
-  tags = {
-    App = "${local.app-name}"
+    Name     = "${local.app-name}_PublicRouteTable"
   }
 }
 
-# Create Route Table Associations
-resource "aws_route_table_association" "public-subnet-association-1" {
-  subnet_id      = aws_subnet.public-subnet-1.id
+## Associate Route Table with Public Subnets
+resource "aws_route_table_association" "public" {
+  count          = local.az_count
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
-resource "aws_route_table_association" "public-subnet-association-2" {
-  subnet_id      = aws_subnet.public-subnet-2.id
+
+## Make our Route Table the main Route Table
+resource "aws_main_route_table_association" "public_main" {
+  vpc_id         = aws_vpc.default_vpc.id
   route_table_id = aws_route_table.public.id
 }
-# resource "aws_route_table_association" "public-subnet-association-3" {
-#   subnet_id      = aws_subnet.public-subnet-3.id
-#   route_table_id = aws_route_table.public.id
-# }
-resource "aws_route_table_association" "private-association-1" {
-  subnet_id      = aws_subnet.private-subnet-1.id
-  route_table_id = aws_route_table.private.id
-}
-resource "aws_route_table_association" "private-association-2" {
-  subnet_id      = aws_subnet.private-subnet-2.id
-  route_table_id = aws_route_table.private.id
-}
-# resource "aws_route_table_association" "private-association-3" {
-#   subnet_id      = aws_subnet.private-subnet-3.id
-#   route_table_id = aws_route_table.private.id
+
+# ## Creates one Elastic IP per AZ (one for each NAT Gateway in each AZ)
+# resource "aws_eip" "nat_gateway" {
+#   count = var.az_count
+#   vpc   = true
+
+#   tags = {
+#     Name     = "${local.app-name}_EIP_${count.index}_${var.environment}"
+#   }
 # }
 
-# End;
+# ## Creates one NAT Gateway per AZ
+# resource "aws_nat_gateway" "nat_gateway" {
+#   count         = var.az_count
+#   subnet_id     = aws_subnet.public[count.index].id
+#   allocation_id = aws_eip.nat_gateway[count.index].id
+
+#   tags = {
+#     Name     = "${local.app-name}_NATGateway_${count.index}_${var.environment}"
+#   }
+# }
+
+# ## One private subnet per AZ
+# resource "aws_subnet" "private" {
+#   count             = var.az_count
+#   cidr_block        = cidrsubnet(var.vpc_cidr_block, 8, count.index)
+#   availability_zone = data.aws_availability_zones.available.names[count.index]
+#   vpc_id            = aws_vpc.default_vpc.id
+
+#   tags = {
+#     Name     = "${local.app-name}_PrivateSubnet_${count.index}_${var.environment}"
+#   }
+# }
+
+# ## Route to the internet using the NAT Gateway
+# resource "aws_route_table" "private" {
+#   count  = var.az_count
+#   vpc_id = aws_vpc.default_vpc.id
+
+#   route {
+#     cidr_block     = "0.0.0.0/0"
+#     nat_gateway_id = aws_nat_gateway.nat_gateway[count.index].id
+#   }
+
+#   tags = {
+#     Name     = "${local.app-name}_PrivateRouteTable_${count.index}_${var.environment}"
+#   }
+# }
+
+# ## Associate Route Table with Private Subnets
+# resource "aws_route_table_association" "private" {
+#   count          = var.az_count
+#   subnet_id      = aws_subnet.private[count.index].id
+#   route_table_id = aws_route_table.private.*.id
+# }
