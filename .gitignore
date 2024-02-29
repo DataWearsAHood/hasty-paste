@@ -5,6 +5,7 @@
 .vscode
 data/
 .env
+.terraform*
 
 __pycache__
 .venv/
@@ -12,4 +13,5 @@ __pycache__
 reports/
 *.egg-info/
 build/
-.terraform*
+
+*.pem
