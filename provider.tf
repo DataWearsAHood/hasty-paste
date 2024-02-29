@@ -3,7 +3,7 @@
 # My terraform provider
 provider "aws" {
   region = "${local.region}"
-  profile = "deployer"
+  # profile = "deployer"  # Use locally only
   # version = "~> 2.7"
 }
 

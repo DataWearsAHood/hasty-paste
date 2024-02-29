@@ -21,7 +21,7 @@ resource "aws_internet_gateway" "igw" {
 # Create (one) NAT Gateway
 resource "aws_eip" "eip-nat-gateway" {
   # count = 1
-  vpc = true
+  domain = "vpc"
 }
 resource "aws_nat_gateway" "nat-gateway-1" {
   allocation_id = aws_eip.eip-nat-gateway.id

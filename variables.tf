@@ -1,7 +1,8 @@
-# variable "AWS_ACCESS_KEY_ID" {
-#   type = string
-#   description = "ACCESS KEY-ID for AWS Credential"
-# }
+# For terraform-plan.yml in GitHub Actions
+variable "AWS_ACCESS_KEY_ID" {
+  type = string
+  description = "ACCESS KEY-ID for AWS Credential"
+}
 
 locals {
   region = "ca-central-1"
