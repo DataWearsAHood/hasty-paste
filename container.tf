@@ -73,10 +73,13 @@ resource "aws_ecs_task_definition" "default" {
       cpu          = 256  # var.cpu_units
       memory       = 512  # var.memory
       essential    = true
+      environment = [{
+        "name":"TIME_ZONE", "value":"${local.env-time-zone}"
+      }]
       portMappings = [
         {
           containerPort = local.app-internal-port
-          hostPort      = 0
+          hostPort      = 8000
           protocol      = "tcp"
         }
       ]

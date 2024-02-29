@@ -52,6 +52,13 @@ resource "aws_launch_template" "ecs_launch_template" {
   )
   vpc_security_group_ids = [aws_security_group.ec2.id]
 
+  metadata_options {
+    # run at least once with `enabled` to require IMDSv2
+    http_endpoint               = "enabled"   
+    http_tokens                 = "required"  # IMDSv2
+    http_put_response_hop_limit = 2
+  }
+
   iam_instance_profile {
     arn = aws_iam_instance_profile.ec2_instance_role_profile.arn
   }
