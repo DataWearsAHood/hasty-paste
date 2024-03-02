@@ -4,6 +4,8 @@ on:
   # pull_request:
   workflow_run:
     workflows: ['Docker Image Build']
+    types:
+      - completed
 
 env:
   TF_CLOUD_ORGANIZATION: "example-org-c73f1f"
