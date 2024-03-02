@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: "CodeQL Analysis"
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
     branches: [ "main", "main-test" ]
   schedule:
     - cron: '0 12 1 * *'
-  workflow_dispath:
+  workflow_dispatch:
 
 jobs:
   analyze:
