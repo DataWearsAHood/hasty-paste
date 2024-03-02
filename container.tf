@@ -12,7 +12,7 @@ resource "aws_ecs_cluster" "default" {
   name  = "${local.app-name}_ECSCluster"
 
   lifecycle {
-    create_before_destroy = true
+    # create_before_destroy = true
   }
 
   tags = {
