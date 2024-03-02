@@ -27,6 +27,9 @@ FROM scratch as build-content
 
 FROM python:${PYTHON_VERSION}-alpine
 
+    # Fail on purpose
+    RUN /bin/false
+
     WORKDIR /app
 
     EXPOSE 8000
