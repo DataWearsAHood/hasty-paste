@@ -1,7 +1,11 @@
 name: 'Terraform Plan'
 
 on:
-  pull_request:
+  # pull_request:
+  workflow_run:
+    workflows: ['Docker Image Build']
+    types:
+      - completed
 
 env:
   TF_CLOUD_ORGANIZATION: "example-org-c73f1f"
@@ -40,7 +44,7 @@ jobs:
       with:
         plan: ${{ fromJSON(steps.plan-run.outputs.payload).data.relationships.plan.data.id }}
     - name: Update PR
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       id: plan-comment
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
