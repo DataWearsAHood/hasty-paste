@@ -1,8 +1,8 @@
 name: 'Docker Push to ECR'
 
 on:
-  push: 
-    branches: [ "main", 'main-test' ]
+  # push: 
+  #   branches: [ "main", 'main-test' ]
   # workflow_run:
   #   workflows: ['Docker Image Build']
   #   types:
