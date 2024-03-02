@@ -16,7 +16,7 @@ env:
   CONFIG_DIRECTORY: "./"
 
 jobs:
-  terraform:
+  terraform-apply:
     if: github.repository != 'hashicorp-education/learn-terraform-github-actions'
     name: "Terraform Apply"
     runs-on: ubuntu-latest
