@@ -1,0 +1,16 @@
+name: Run deployment pipeline
+
+on:
+  push:
+    branches: ["main", "main-test" ]
+
+jobs:
+  call-codeql:
+    uses: ./.github/workflows/codeql-analysis.yml
+  call-tests:
+    uses: ./.github/workflows/tests.yml
+  call-publish:
+    uses: ./.github/workflows/docker-build-push-ecr.yml
+  call-tf-apply:
+    needs: call-publish
+    uses: ./.github/workflows/terraform-plan.yml

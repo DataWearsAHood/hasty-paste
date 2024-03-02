@@ -1,11 +1,12 @@
 name: Tests
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main, next ]
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main, next ]
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   unit-test:

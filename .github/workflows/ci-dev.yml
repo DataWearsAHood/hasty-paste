@@ -1,0 +1,14 @@
+name: Run PR-checker pipeline
+
+on:
+  pull_request: # all of them
+
+jobs:
+  call-codeql:
+    uses: ./.github/workflows/codeql-analysis.yml
+  call-tests:
+    uses: ./.github/workflows/tests.yml
+  call-build:
+    uses: ./.github/workflows/docker-build.yml
+  call-tf-plan:
+    uses: ./.github/workflows/terraform-plan.yml

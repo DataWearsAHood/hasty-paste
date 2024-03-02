@@ -1,8 +1,9 @@
 name: 'Terraform Apply'
 
 on:
-  push:
-    branches: ["main", "main-test" ]
+  # push:
+  #   branches: ["main", "main-test" ]
+  workflow_call:
 
 env:
   TF_CLOUD_ORGANIZATION: "example-org-c73f1f"

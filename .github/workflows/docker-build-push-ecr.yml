@@ -1,7 +1,9 @@
 name: Docker Push to ECR
+
 on: 
-  push: 
-    branches: [ "main", 'main-test' ]
+  # push: 
+  #   branches: [ "main", 'main-test' ]
+  workflow_call:
   
 jobs:
   docker-build-push-ecr:

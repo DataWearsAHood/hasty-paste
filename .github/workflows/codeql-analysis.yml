@@ -1,10 +1,11 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ "main" ]
-  schedule:
-    - cron: '0 12 1 * *'
+  # push:
+  #   branches: [ "main" ]
+  # schedule:
+  #   - cron: '0 12 1 * *'
+  workflow_call:
 
 jobs:
   analyze:
