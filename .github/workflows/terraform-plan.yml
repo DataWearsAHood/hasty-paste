@@ -1,11 +1,15 @@
 name: 'Terraform Plan'
 
 on:
-  # pull_request:
-  workflow_run:
-    workflows: ['Docker Image Build']
-    types:
-      - completed
+  pull_request:
+    branches: [ "main", 'main-test' ]
+  push:
+    branches: [ "!main", '!main-test' ]
+  # workflow_run:
+  #   workflows: ['Docker Image Build']
+  #   types:
+  #     - completed
+  workflow_dispatch:
 
 env:
   TF_CLOUD_ORGANIZATION: "example-org-c73f1f"
@@ -14,9 +18,17 @@ env:
   CONFIG_DIRECTORY: "./"
 
 jobs:
+  build:
+    name: Test-build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile # --tag my-image-name:$(date +%s)
   terraform-plan:
     if: github.repository != 'hashicorp-education/learn-terraform-github-actions'
     name: "Terraform Plan"
+    needs: "build"
     runs-on: ubuntu-latest
     permissions:
       contents: read
