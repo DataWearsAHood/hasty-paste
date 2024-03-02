@@ -5,6 +5,7 @@ on:
   #   branches: ["main", "main-test" ]
   workflow_run:
     workflows: ['Docker Push to ECR']
+    branches: ["main", "main-test" ]
     types:
       - completed
 
