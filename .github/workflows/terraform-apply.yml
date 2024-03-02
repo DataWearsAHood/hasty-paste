@@ -1,4 +1,4 @@
-name: 'Terraform Apply'
+name: 'Build/Push + Terraform Apply'
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
   #   branches: ["main", "main-test" ]
   #   types:
   #     - completed
+  workflow_dispatch:
 
 env:
   TF_CLOUD_ORGANIZATION: "example-org-c73f1f"
