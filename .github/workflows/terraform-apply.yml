@@ -62,9 +62,8 @@ jobs:
           #   CVE-2014-7654321
           #   CVE-2014-456132
     # The workflow is not valid. .github/workflows/terraform-apply.yml: Unexpected value 'run'
-
     # - run: echo "${{ steps.docker-scan.outputs.total }} total vulnerabilities."
-    run: "echo \"ECR-Scan findings: ${{ steps.docker-scan.outputs.findingsDetails }}\""
+    # run: "echo \"ECR-Scan findings: ${{ steps.docker-scan.outputs.findingsDetails }}\""
 
   terraform-apply:
     if: github.repository != 'hashicorp-education/learn-terraform-github-actions'
