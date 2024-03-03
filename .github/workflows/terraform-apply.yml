@@ -43,12 +43,30 @@ jobs:
           run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            
+  ecr-scan:
+    name: Build/Push Docker Image
+    needs: build-push
+    runs-on: ubuntu-latest  
+      - name: Scan Docker image
+        id: docker-scan
+        uses: alexjurkiewicz/ecr-scan-image@v1.7.1
+        with:
+          repository: hasty-paste-manual  # myorg/myimage
+          tag: ${{ steps.docker-build.outputs.tag }}
+          fail_threshold: critical
+          # ignore_list: |
+          #   CVE-2014-7654321
+          #   CVE-2014-456132
+      # Access scan results in later steps
+      - run: echo "ECR-Scan findings: ${{ steps.docker-scan.outputs.findingsDetails }}"
 
   terraform-apply:
     if: github.repository != 'hashicorp-education/learn-terraform-github-actions'
     name: "Terraform Apply"
-    needs: "build-push"
+    needs: ecr-scan
     runs-on: ubuntu-latest
+    needs: build-push
     permissions:
       contents: read
     steps:
