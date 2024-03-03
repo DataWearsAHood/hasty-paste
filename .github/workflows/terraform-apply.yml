@@ -51,17 +51,16 @@ jobs:
   #   needs: build-push
   #   runs-on: ubuntu-latest  
   #   steps:
-      - name: Scan Docker image
-        id: docker-scan
-        uses: alexjurkiewicz/ecr-scan-image@v1.7.1
-        with:
-          repository: ${{ env.ECR_REPOSITORY }} # hasty-paste-manual  # myorg/myimage
-          tag: ${{ env.IMAGE_TAG }} # ${{ steps.build-push.outputs.tag }}
-          fail_threshold: critical
-          # ignore_list: |
-          #   CVE-2014-7654321
-          #   CVE-2014-456132
-          region: ${{ secrets.AWS_REGION }}
+        - name: Scan Docker image
+          id: docker-scan
+          uses: alexjurkiewicz/ecr-scan-image@v1.7.1
+          with:
+            repository: ${{ env.ECR_REPOSITORY }} # hasty-paste-manual  # myorg/myimage
+            tag: ${{ env.IMAGE_TAG }} # ${{ steps.build-push.outputs.tag }}
+            fail_threshold: critical
+            # ignore_list: |
+            #   CVE-2014-7654321
+            #   CVE-2014-456132
     # The workflow is not valid. .github/workflows/terraform-apply.yml: Unexpected value 'run'
     # - run: echo "${{ steps.docker-scan.outputs.total }} total vulnerabilities."
     # run: "echo \"ECR-Scan findings: ${{ steps.docker-scan.outputs.findingsDetails }}\""
