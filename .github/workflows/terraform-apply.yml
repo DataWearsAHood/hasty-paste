@@ -48,6 +48,7 @@ jobs:
     name: Build/Push Docker Image
     needs: build-push
     runs-on: ubuntu-latest  
+    steps:
       - name: Scan Docker image
         id: docker-scan
         uses: alexjurkiewicz/ecr-scan-image@v1.7.1
