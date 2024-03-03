@@ -27,7 +27,7 @@ resource "aws_subnet" "public" {
   cidr_block              = cidrsubnet(local.vpc-cidr, 8, local.az_count + count.index)
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   vpc_id                  = aws_vpc.default_vpc.id
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true  # Use the public IP allocated (_from where_?)
 
   tags = {
     Name     = "${local.app-name}_PublicSubnet_${count.index}"
