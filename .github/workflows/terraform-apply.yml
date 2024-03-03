@@ -46,11 +46,11 @@ jobs:
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-  ecr-scan:
-    name: Get ECR-Scan's Results
-    needs: build-push
-    runs-on: ubuntu-latest  
-    steps:
+  # ecr-scan:
+  #   name: Get ECR-Scan's Results
+  #   needs: build-push
+  #   runs-on: ubuntu-latest  
+  #   steps:
       - name: Scan Docker image
         id: docker-scan
         uses: alexjurkiewicz/ecr-scan-image@v1.7.1
@@ -69,7 +69,7 @@ jobs:
   terraform-apply:
     if: github.repository != 'hashicorp-education/learn-terraform-github-actions'
     name: "Terraform Apply"
-    needs: ecr-scan
+    needs: build-push
     runs-on: ubuntu-latest
     permissions:
       contents: read
