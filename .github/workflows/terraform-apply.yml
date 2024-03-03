@@ -66,6 +66,7 @@ jobs:
     name: "Terraform Apply"
     needs: ecr-scan
     runs-on: ubuntu-latest
+    needs: docker-build-push-ecr
     permissions:
       contents: read
     steps:
