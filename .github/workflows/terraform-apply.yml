@@ -45,7 +45,7 @@ jobs:
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   ecr-scan:
-    name: Build/Push Docker Image
+    name: Get ECR-Scan's Results
     needs: build-push
     runs-on: ubuntu-latest  
     steps:
