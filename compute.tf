@@ -166,7 +166,7 @@ resource "aws_autoscaling_group" "ecs-hosts" {
   desired_capacity   = 1
   max_size           = 1
   min_size           = 1
-  # availability_zones = ["${local.region}a"]
+  # availability_zones = ["${local.region}a"]   # why `vpc_zone_identifier` over this?
   vpc_zone_identifier = [aws_subnet.public[0].id]
 
   launch_template {
