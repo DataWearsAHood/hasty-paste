@@ -64,7 +64,7 @@ jobs:
         with:
           repository: ${{ env.ECR_REPOSITORY }} # hasty-paste-manual  # myorg/myimage
           tag: ${{ env.IMAGE_TAG }} # ${{ steps.build-push.outputs.tag }}
-          fail_threshold: critical
+          fail_threshold: high
           # ignore_list: |
           #   CVE-2014-7654321
           #   CVE-2014-456132
