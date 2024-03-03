@@ -46,21 +46,28 @@ jobs:
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-  # ecr-scan:
-  #   name: Get ECR-Scan's Results
-  #   needs: build-push
-  #   runs-on: ubuntu-latest  
-  #   steps:
-        - name: Scan Docker image
-          id: docker-scan
-          uses: alexjurkiewicz/ecr-scan-image@v1.7.1
-          with:
-            repository: ${{ env.ECR_REPOSITORY }} # hasty-paste-manual  # myorg/myimage
-            tag: ${{ env.IMAGE_TAG }} # ${{ steps.build-push.outputs.tag }}
-            fail_threshold: critical
-            # ignore_list: |
-            #   CVE-2014-7654321
-            #   CVE-2014-456132
+  ecr-scan:
+    name: Get ECR-Scan's Results
+    needs: build-push
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Setup AWS ECR Details
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.PUSHER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PUSHER_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{secrets.AWS_REGION}}
+
+      - name: Scan Docker image
+        id: docker-scan
+        uses: alexjurkiewicz/ecr-scan-image@v1.7.1
+        with:
+          repository: ${{ env.ECR_REPOSITORY }} # hasty-paste-manual  # myorg/myimage
+          tag: ${{ env.IMAGE_TAG }} # ${{ steps.build-push.outputs.tag }}
+          fail_threshold: critical
+          # ignore_list: |
+          #   CVE-2014-7654321
+          #   CVE-2014-456132
     # The workflow is not valid. .github/workflows/terraform-apply.yml: Unexpected value 'run'
     # - run: echo "${{ steps.docker-scan.outputs.total }} total vulnerabilities."
     # run: "echo \"ECR-Scan findings: ${{ steps.docker-scan.outputs.findingsDetails }}\""
@@ -68,7 +75,7 @@ jobs:
   terraform-apply:
     if: github.repository != 'hashicorp-education/learn-terraform-github-actions'
     name: "Terraform Apply"
-    needs: build-push
+    needs: ecr-scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
